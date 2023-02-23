@@ -8,7 +8,6 @@ from .config import SIGN_UP_PATH
 from .config import GET_TOKEN_PATH
 from .config import SET_NGROK_IP
 from .config import GET_NGROK_IP
-from .config import SHOW_AVAILABLE_PC_PATH
 from .config import NGROK_UPLOAD_FILE
 from .config import NGROK_CMD_COMMAND
 from .config import NGROK_CHECK_ONLINE
@@ -25,9 +24,11 @@ __all__ = [
     "PATH",
     "SIGN_UP_PATH",
     "GET_TOKEN_PATH",
-    "CHANGE_ACTIVE_MODE_PATH",
-    "SHOW_AVAILABLE_PC_PATH",
-    "WS_CONNECT_PATH",
+    "SET_NGROK_IP",
+    "GET_NGROK_IP",
+    "NGROK_UPLOAD_FILE",
+    "NGROK_CMD_COMMAND",
+    "NGROK_CHECK_ONLINE",
     "DEVICE_TYPE",
     "CONFIG_FILE",
     "ERROR_LOG_FILENAME",

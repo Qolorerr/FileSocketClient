@@ -1,6 +1,5 @@
 import logging
 import shutil
-import sys
 import zipfile
 from pathlib import Path
 from typing import Optional

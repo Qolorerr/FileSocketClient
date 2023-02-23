@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 import requests
 
-from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH, SHOW_AVAILABLE_PC_PATH
+from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH
 from .config import DEVICE_TYPE
 from .storekeeper import Storekeeper
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         sign_in_parser.add_argument('-password', type=str, help='Your password', required=True)
         sign_in_parser.set_defaults(func=sign_in)
     else:
-        run_parser = subparsers.add_parser('run', help="Run qhelper client")
+        run_parser = subparsers.add_parser('run', help="Run filesocket client")
         run_parser.add_argument('-manage', type=int, help='Id of managing device')
         run_parser.add_argument('-token', type=str, help='Secure token')
         run_parser.set_defaults(func=run)
