@@ -1,8 +1,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='qhelper_client',
-    packages=['qhelper_client'] + ['qhelper_client.' + pkg for pkg in find_packages('qhelper_client')],
+    name='filesocket',
+    packages=['filesocket'] + ['filesocket.' + pkg for pkg in find_packages('filesocket')],
+    version='0.1.0',
+    description='Transferring data between PCs library',
+    author='Qolorer',
+    license='MIT',
     install_requires=[
         'requests == "2.28.1"',
         'python_version == "3.9"',

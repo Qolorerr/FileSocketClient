@@ -13,8 +13,8 @@ from fastapi import FastAPI, UploadFile, HTTPException, Form, File
 from pyngrok import ngrok
 from starlette.responses import FileResponse
 
-from qhelper_client.config import PATH, SET_NGROK_IP
-from qhelper_client.storekeeper import Storekeeper
+from filesocket.config import PATH, SET_NGROK_IP
+from filesocket.storekeeper import Storekeeper
 
 
 DOWNLOADS_PATH = Path.home() / "Downloads"

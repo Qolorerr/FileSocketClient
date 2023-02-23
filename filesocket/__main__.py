@@ -15,8 +15,8 @@ logger = logging.getLogger("app")
 
 
 def _on_server_error(error: Exception) -> None:
-    logger.info(f"Server error {error}")
-    print(f"Server error {error}\n")
+    logger.info(f"Server error {error.args}")
+    print(f"Server error {error.args}\n")
     sys.exit()
 
 
@@ -96,4 +96,4 @@ if __name__ == "__main__":
     try:
         args.func(args)
     except AttributeError:
-        print("Use qhelper_client -h\n")
+        print("Use filesocket -h\n")
