@@ -1,9 +1,15 @@
 PATH = "127.0.0.1:5000"
 SIGN_UP_PATH = "/signup"
 GET_TOKEN_PATH = "/get_token"
-CHANGE_ACTIVE_MODE_PATH = "/change_active_mode"
+GET_NGROK_IP = "/get_ngrok_ip"
+SET_NGROK_IP = "/set_ngrok_ip"
 SHOW_AVAILABLE_PC_PATH = "/show_available_pc"
-WS_CONNECT_PATH = "/connect"
+
+NGROK_CHECK_ONLINE = "/"
+NGROK_CMD_COMMAND = "/cmd"
+NGROK_UPLOAD_FILE = "/file/upload"
+NGROK_DOWNLOAD_FILE = "/file/download"
+NGROK_LIST_FILES = "/file/list"
 
 DEVICE_TYPE = "pc"
 

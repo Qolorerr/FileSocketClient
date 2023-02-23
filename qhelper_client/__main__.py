@@ -6,8 +6,6 @@ import requests
 
 from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH, SHOW_AVAILABLE_PC_PATH
 from .config import DEVICE_TYPE
-from .managed_device_client import ManagedClient
-from .managing_device_client import ManagingClient
 from .storekeeper import Storekeeper
 
 
@@ -49,8 +47,8 @@ def get_token(args: Namespace) -> None:
         response = requests.get(f'http://{PATH}{GET_TOKEN_PATH}', json=json)
     except Exception as e:
         _on_server_error(e)
-    if response.status_code == 201 and 'token' in response.headers:
-        store_keeper.add_token(response.headers['token'])
+    if response.status_code == 201 and 'token' in response.json():
+        store_keeper.add_token(response.json()['token'])
         logger.info(f"Got new token, login/email: {args.login}")
         print("Got new token\n")
     else:
@@ -60,33 +58,14 @@ def get_token(args: Namespace) -> None:
 
 
 def run(args: Namespace) -> None:
+    token = '' if args.token is None else args.token
     if args.manage is None:
-        client = ManagedClient(store_keeper)
+        from .managed_device_client import ManagedClient
+        client = ManagedClient(store_keeper, require_token=token)
     else:
-        client = ManagingClient(store_keeper, str(args.manage))
+        from .managing_device_client import ManagingClient
+        client = ManagingClient(store_keeper, str(args.manage), device_secure_token=token)
     client.run()
-
-
-def show_available_pc(args: Namespace) -> None:
-    token = store_keeper.get_token()
-    if token is None:
-        print("Token is required\n")
-        return
-    json = {"token": token}
-    try:
-        response = requests.get(f'http://{PATH}{SHOW_AVAILABLE_PC_PATH}', json=json)
-    except Exception as e:
-        _on_server_error(e)
-    json = response.json()
-    if response.status_code == 200 and 'devices' in json:
-        logger.debug(f"Got new list of available pc")
-        print("Available devices:\n")
-        for device in json['devices']:
-            print(f"{device['id']}\t{device['name']}\n")
-    else:
-        message = response.headers['message'] if 'message' in response.headers else ''
-        logger.info(f"Error due showing devices, code: {response.status_code}")
-        print(f"Error due showing devices: {response.status_code} {message}\n")
 
 
 if __name__ == "__main__":
@@ -110,10 +89,8 @@ if __name__ == "__main__":
     else:
         run_parser = subparsers.add_parser('run', help="Run qhelper client")
         run_parser.add_argument('-manage', type=int, help='Id of managing device')
+        run_parser.add_argument('-token', type=str, help='Secure token')
         run_parser.set_defaults(func=run)
-
-        show_available_pc_parser = subparsers.add_parser('show_pc', help="Show available pc (For managing device)")
-        show_available_pc_parser.set_defaults(func=show_available_pc)
 
     args = arg_parser.parse_args()
     try:

@@ -35,6 +35,13 @@ class Storekeeper:
         with open(CONFIG_FILE, 'w') as f:
             json.dump(data, f, indent=2)
 
+    def get_value(self, key: str):
+        data = self._get_json()
+        try:
+            return data[key]
+        except KeyError:
+            raise KeyError("JSON key not found")
+
     def add_token(self, token: str) -> None:
         self.add_value(TOKEN_KEY, token)
 
