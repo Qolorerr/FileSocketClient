@@ -138,5 +138,5 @@ class ManagedClient:
         logger.info(f"Ngrok ip: {self.ngrok_ip}")
         self._post_ngrok_ip()
 
-        uvicorn.run("managed_device_client:app", port=self.port, reload=False, log_level="debug")
+        uvicorn.run("filesocket.managed_device_client:app", port=self.port, reload=False, log_level="debug")
         logger.debug(f"Connection closed")
