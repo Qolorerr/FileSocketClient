@@ -4,7 +4,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 import requests
 
-from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH
+from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH, SHOW_ALL_PC_PATH
 from .config import DEVICE_TYPE
 from .storekeeper import Storekeeper
 
@@ -57,6 +57,28 @@ def get_token(args: Namespace) -> None:
         print(f"Error due getting token: {response.status_code} {message}\n")
 
 
+def show_all_pc(args: Namespace) -> None:
+    token = store_keeper.get_token()
+    if token is None:
+        print("Token is required\n")
+        return
+    json = {"token": token}
+    try:
+        response = requests.get(f'http://{PATH}{SHOW_ALL_PC_PATH}', json=json)
+    except Exception as e:
+        _on_server_error(e)
+    json = response.json()
+    if response.status_code == 200 and 'devices' in json:
+        logger.debug(f"Got new list of pc")
+        print("Your PCs:\n")
+        for device in json['devices']:
+            print(f"{device['id']}\t{device['name']}\n")
+    else:
+        message = response.headers['message'] if 'message' in response.headers else ''
+        logger.info(f"Error due showing devices, code: {response.status_code}")
+        print(f"Error due showing devices: {response.status_code} {message}\n")
+
+
 def run(args: Namespace) -> None:
     token = '' if args.token is None else args.token
     if args.manage is None:
@@ -91,6 +113,9 @@ if __name__ == "__main__":
         run_parser.add_argument('-manage', type=int, help='Id of managing device')
         run_parser.add_argument('-token', type=str, help='Secure token')
         run_parser.set_defaults(func=run)
+
+        show_all_pc_parser = subparsers.add_parser('show_pc', help="Show your PCs (For managing device)")
+        show_all_pc_parser.set_defaults(func=show_all_pc)
 
     args = arg_parser.parse_args()
     try:

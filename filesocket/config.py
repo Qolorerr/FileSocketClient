@@ -3,6 +3,7 @@ SIGN_UP_PATH = "/signup"
 GET_TOKEN_PATH = "/get_token"
 GET_NGROK_IP = "/get_ngrok_ip"
 SET_NGROK_IP = "/set_ngrok_ip"
+SHOW_ALL_PC_PATH = "/show_all_pc"
 
 NGROK_CHECK_ONLINE = "/"
 NGROK_CMD_COMMAND = "/cmd"
