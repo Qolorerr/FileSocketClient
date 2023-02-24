@@ -10,6 +10,7 @@ setup(
     version='0.1.2',
     description='Transferring data between PCs library',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Mikhail Ivanov',
     author_email='qolorer@gmail.com',
     url='https://github.com/Qolorerr/FileSocketClient',
