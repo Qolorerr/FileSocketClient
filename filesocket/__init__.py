@@ -1,8 +1,10 @@
 import sys
 
-from .__main__ import store_keeper
+from .storekeeper import Storekeeper
 from .managed_device_client import ManagedClient
 from .managing_device_client import ManagingClient
+from .exceptions import ServerError
+from .exceptions import PathNotFoundError
 from .config import PATH
 from .config import SIGN_UP_PATH
 from .config import GET_TOKEN_PATH
@@ -18,9 +20,11 @@ from .config import RECEIVED_COMMANDS_LOG
 from .config import LOGGER_CONFIG
 
 __all__ = [
-    "store_keeper",
+    "Storekeeper",
     "ManagedClient",
     "ManagingClient",
+    "ServerError",
+    "PathNotFoundError",
     "PATH",
     "SIGN_UP_PATH",
     "GET_TOKEN_PATH",

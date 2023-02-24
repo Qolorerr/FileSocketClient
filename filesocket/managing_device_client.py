@@ -181,12 +181,12 @@ class ManagingClient:
             message = response.headers['message'] if 'message' in response.headers else ''
             raise ServerError(f"Can't get ngrok ip: {response.status_code} {message}\n")
 
-    def run(self, without_ui: bool = False) -> None:
+    def run(self, text_ui: bool = True) -> None:
         try:
             self._get_ngrok_ip()
         except ServerError as e:
             print(f"Server error {e.args}")
             self.logger.info(f"Server error {e.args}")
             return
-        if not without_ui:
+        if text_ui:
             self._user_interface()
