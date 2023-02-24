@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional, Callable, Any
 import requests
 import uvicorn
-from fastapi import FastAPI, UploadFile, HTTPException, Form, File
+from fastapi import FastAPI, UploadFile, HTTPException, Form, File, Header
 from pyngrok import ngrok
 from starlette.responses import FileResponse
 
@@ -41,7 +41,7 @@ def is_online() -> dict:
 
 @app.get('/file/list')
 @token_required
-def list_files(path: Path, token: Optional[str] = ''):
+def list_files(path: Path, token: Optional[str] = Header(default='')):
     if not path.exists() or not path.is_dir():
         raise HTTPException(status_code=404, detail="Path not found")
     logger.info(f"Sent list of files in {path}")
@@ -52,7 +52,7 @@ def list_files(path: Path, token: Optional[str] = ''):
 
 @app.get('/file/download')
 @token_required
-def download_file(path: Path, token: Optional[str] = ''):
+def download_file(path: Path, token: Optional[str] = Header(default='')):
     if not path.exists():
         raise HTTPException(status_code=404, detail="Path not found")
     if path.is_file():
@@ -71,7 +71,8 @@ def download_file(path: Path, token: Optional[str] = ''):
 
 @app.post("/file/upload")
 @token_required
-def upload_file(file: UploadFile = File(), destination: Optional[Path] = Form(None), token: Optional[str] = ''):
+def upload_file(file: UploadFile = File(), destination: Optional[Path] = Form(None),
+                token: Optional[str] = Header(default='')):
     if destination is not None and not destination.exists():
         raise HTTPException(status_code=404, detail="Destination not found")
     if destination is None:
@@ -89,7 +90,7 @@ def upload_file(file: UploadFile = File(), destination: Optional[Path] = Form(No
 
 @app.get("/cmd")
 @token_required
-def execute_cmd(command: str, token: Optional[str] = ''):
+def execute_cmd(command: str, token: Optional[str] = Header(default='')):
     logger.warning(f"Executed cmd command {command}")
     out, err = subprocess.Popen(command,
                                 shell=True,
