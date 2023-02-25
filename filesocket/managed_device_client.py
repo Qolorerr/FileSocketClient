@@ -15,6 +15,7 @@ from starlette.responses import FileResponse
 
 from filesocket.config import PATH, SET_NGROK_IP
 from filesocket.storekeeper import Storekeeper
+from filesocket.exceptions import ServerError
 
 
 DOWNLOADS_PATH = Path.home() / "Downloads"
@@ -123,21 +124,22 @@ class ManagedClient:
         try:
             response = requests.post(f'http://{PATH}{SET_NGROK_IP}', json=json)
         except Exception as e:
-            logger.info(f"Server error {e}")
-            print(f"Server error {e}\n")
-            sys.exit()
+            raise ServerError(e)
         if response.status_code != 200:
             message = response.headers['message'] if 'message' in response.headers else ''
-            logger.info(f"Error due set ngrok ip, code: {response.status_code}")
-            print(f"Error due set ngrok ip: {response.status_code} {message}\n")
-            sys.exit()
+            raise ServerError(f"{response.status_code} {message}")
         else:
             logger.debug(f"Successful set ngrok ip")
 
     def run(self) -> None:
         self.ngrok_ip = ngrok.connect(self.port).public_url
         logger.info(f"Ngrok ip: {self.ngrok_ip}")
-        self._post_ngrok_ip()
+        try:
+            self._post_ngrok_ip()
+        except ServerError as e:
+            print(f"Server error due setting ngrok ip {e.args}")
+            print("Local host mode")
+            logger.info(f"Server error due setting ngrok ip {e.args}")
 
-        uvicorn.run("filesocket.managed_device_client:app", port=self.port, reload=False, log_level="debug")
+        uvicorn.run("filesocket.managed_device_client:app", port=self.port, reload=False, log_level="info")
         logger.debug(f"Connection closed")
