@@ -6,13 +6,9 @@ from dataclasses import dataclass
 from typing import Tuple
 import requests
 
-from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH, SHOW_ALL_PC_PATH
-from .config import DEVICE_TYPE
-from .storekeeper import Storekeeper
+from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH, SHOW_ALL_PC_PATH, DEVICE_TYPE, store_keeper
 from .exceptions import ServerError, TokenRequired
 
-
-store_keeper = Storekeeper()
 
 logger = logging.getLogger("app")
 
@@ -115,10 +111,10 @@ def show_all_pc_ui(args: Namespace | None = None) -> None:
 def run(args: Namespace) -> None:
     if args.manage is None:
         from .managed_device_client import ManagedClient
-        client = ManagedClient(store_keeper, require_token=args.token)
+        client = ManagedClient(require_token=args.token)
     else:
         from .managing_device_client import ManagingClient
-        client = ManagingClient(store_keeper, str(args.manage), device_secure_token=args.token)
+        client = ManagingClient(str(args.manage), device_secure_token=args.token)
     try:
         client.run()
     except TokenRequired as e:
@@ -128,9 +124,6 @@ def run(args: Namespace) -> None:
 if __name__ == "__main__":
     arg_parser = ArgumentParser()
     subparsers = arg_parser.add_subparsers(help='Methods')
-
-    if not store_keeper.check_existence():
-        store_keeper.init()
 
     if not store_keeper.get_token():
         sign_up_parser = subparsers.add_parser('sign_up', help='Create new account')

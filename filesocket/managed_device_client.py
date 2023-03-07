@@ -12,8 +12,7 @@ from fastapi import FastAPI, UploadFile, HTTPException, Form, File, Header
 from pyngrok import ngrok
 from starlette.responses import FileResponse
 
-from .config import PATH, SET_NGROK_IP
-from .storekeeper import Storekeeper
+from .config import PATH, SET_NGROK_IP, store_keeper
 from .exceptions import ServerError, TokenRequired
 
 
@@ -105,21 +104,20 @@ def execute_cmd(command: str, token: Optional[str] = Header(default='')):
 
 
 class ManagedClient:
-    def __init__(self, store_keeper: Storekeeper, port: int = 8000, require_token: str | None = None) -> None:
+    def __init__(self, port: int = 8000, require_token: str | None = None) -> None:
         require_token = '' if require_token is None else require_token
         global secure_token
-        self.store_keeper = store_keeper
         self.port = port
         secure_token = require_token
         try:
-            ngrok_token = self.store_keeper.get_value("ngrok_token")
+            ngrok_token = store_keeper.get_value("ngrok_token")
             ngrok.set_auth_token(ngrok_token)
         except KeyError:
             logger.warning("Ngrok token not found in config.json")
         self.ngrok_ip = ""
 
     def _post_ngrok_ip(self) -> None:
-        token = self.store_keeper.get_token()
+        token = store_keeper.get_token()
         if token is None:
             raise TokenRequired()
         json = {"token": token, "ngrok_ip": self.ngrok_ip}

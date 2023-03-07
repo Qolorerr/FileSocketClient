@@ -1,6 +1,5 @@
 import sys
 
-from .storekeeper import Storekeeper
 from .managed_device_client import ManagedClient
 from .managing_device_client import ManagingClient
 from .exceptions import ServerError
@@ -27,7 +26,6 @@ from .__main__ import show_all_pc
 from .__main__ import PCEntity
 
 __all__ = [
-    "Storekeeper",
     "ManagedClient",
     "ManagingClient",
     "ServerError",

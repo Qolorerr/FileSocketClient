@@ -1,5 +1,7 @@
 import os
 
+from .storekeeper import Storekeeper
+
 PATH = os.environ.get('FileSocketServer', "127.0.0.1:5000")
 SIGN_UP_PATH = "/filesocket/signup"
 GET_TOKEN_PATH = "/filesocket/get_token"
@@ -81,3 +83,7 @@ LOGGER_CONFIG = {
         ]
     },
 }
+
+store_keeper = Storekeeper(LOGGER_CONFIG, CONFIG_FILE)
+if not store_keeper.check_existence():
+    store_keeper.init()

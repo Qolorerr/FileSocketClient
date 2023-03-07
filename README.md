@@ -8,16 +8,21 @@ Library for file transfer and remote PC control
 ## Quick usage
 ```python
 from pathlib import Path
-from filesocket import Storekeeper, ManagedClient, ManagingClient
+from filesocket import sign_in, show_all_pc, ManagedClient, ManagingClient
 
-store_keeper = Storekeeper()
+
+# Sign in
+sign_in("login", "password")
 
 # Create managed client
-client = ManagedClient(store_keeper, port=7999, require_token='token')
+client = ManagedClient(port=7999, require_token='token')
 client.run()
 
+# Get managed pc id
+all_pc = show_all_pc()
+
 # Create managing client
-client = ManagingClient(store_keeper, device_id='2', device_secure_token='token')
+client = ManagingClient(device_id=all_pc[0].id, device_secure_token='token')
 client.run(text_ui=False)
 
 # Send cmd command

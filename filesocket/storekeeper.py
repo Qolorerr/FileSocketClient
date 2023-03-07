@@ -1,29 +1,23 @@
 import json
 import os
 from logging.config import dictConfig
-from typing import Optional
-
-from .config import CONFIG_FILE, LOGGER_CONFIG
-
-TOKEN_KEY = 'token'
 
 
 class Storekeeper:
-    def __init__(self):
-        dictConfig(LOGGER_CONFIG)
+    def __init__(self, logger_config: dict, config_file: str):
+        dictConfig(logger_config)
+        self.config_file = config_file
 
-    @staticmethod
-    def init() -> None:
-        with open(CONFIG_FILE, 'w') as f:
+    def init(self) -> None:
+        with open(self.config_file, 'w') as f:
             json.dump({}, f, indent=2)
 
-    @staticmethod
-    def check_existence():
-        return os.path.exists(CONFIG_FILE)
+    def check_existence(self):
+        return os.path.exists(self.config_file)
 
     def _get_json(self) -> dict:
         if self.check_existence():
-            with open(CONFIG_FILE) as f:
+            with open(self.config_file) as f:
                 data = json.load(f)
         else:
             data = dict()
@@ -32,7 +26,7 @@ class Storekeeper:
     def add_value(self, key: str, value) -> None:
         data = self._get_json()
         data[key] = value
-        with open(CONFIG_FILE, 'w') as f:
+        with open(self.config_file, 'w') as f:
             json.dump(data, f, indent=2)
 
     def get_value(self, key: str):
@@ -43,8 +37,8 @@ class Storekeeper:
             raise KeyError("JSON key not found")
 
     def add_token(self, token: str) -> None:
-        self.add_value(TOKEN_KEY, token)
+        self.add_value("token", token)
 
-    def get_token(self) -> Optional[str]:
+    def get_token(self) -> str | None:
         data = self._get_json()
-        return data[TOKEN_KEY] if TOKEN_KEY in data else None
+        return data["token"] if "token" in data else None
