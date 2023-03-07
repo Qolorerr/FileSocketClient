@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 setup(
     name='filesocket',
     packages=['filesocket'] + ['filesocket.' + pkg for pkg in find_packages('filesocket')],
-    version='0.1.4',
+    version='0.1.5',
     description='Transferring data between PCs library',
     long_description=long_description,
     long_description_content_type='text/markdown',

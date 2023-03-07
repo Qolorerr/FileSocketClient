@@ -2,11 +2,14 @@ import logging
 import socket
 import sys
 from argparse import ArgumentParser, Namespace
+from dataclasses import dataclass
+from typing import Tuple
 import requests
 
 from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH, SHOW_ALL_PC_PATH
 from .config import DEVICE_TYPE
 from .storekeeper import Storekeeper
+from .exceptions import ServerError, TokenRequired
 
 
 store_keeper = Storekeeper()
@@ -20,74 +23,106 @@ def _on_server_error(error: Exception) -> None:
     sys.exit()
 
 
-def sign_up(args: Namespace) -> None:
-    json = {"login": args.login, "email": args.email, "password": args.password}
+def sign_up(login: str, email: str, password: str) -> None:
+    json = {"login": login, "email": email, "password": password}
     try:
         response = requests.post(f'http://{PATH}{SIGN_UP_PATH}', json=json)
     except Exception as e:
-        _on_server_error(e)
+        raise ServerError(e)
     if response.status_code == 201:
-        print("Signed up successfully\n")
-        logger.info(f"Signed up, login: {args.login}, email: {args.email}")
-        get_token(args)
+        get_token(login, password)
     else:
         message = response.headers['message'] if 'message' in response.headers else ''
-        logger.info(f"Error due signing up, login: {args.login}, email: {args.email}, code: {response.status_code}")
-        print(f"Error due signing up: {response.status_code} {message}\n")
+        raise ServerError(f"{response.status_code} {message}")
 
 
-def sign_in(args: Namespace) -> None:
-    get_token(args)
+def sign_up_ui(args: Namespace) -> None:
+    try:
+        sign_up(args.login, args.email, args.password)
+        print("Signed up successfully")
+    except ServerError as e:
+        _on_server_error(e)
 
 
-def get_token(args: Namespace) -> None:
+def sign_in(login: str, password: str) -> None:
+    get_token(login, password)
+
+
+def sign_in_ui(args: Namespace) -> None:
+    try:
+        sign_in(args.login, args.password)
+        print("Signed in successfully")
+    except ServerError as e:
+        _on_server_error(e)
+
+
+def get_token(login: str, password: str) -> None:
     pc_name = socket.gethostname()
-    json = {"login_or_email": args.login, "password": args.password, "name": pc_name, "type": DEVICE_TYPE}
+    json = {"login_or_email": login, "password": password, "name": pc_name, "type": DEVICE_TYPE}
     try:
         response = requests.get(f'http://{PATH}{GET_TOKEN_PATH}', json=json)
     except Exception as e:
-        _on_server_error(e)
+        raise ServerError(e)
     if response.status_code == 201 and 'token' in response.json():
         store_keeper.add_token(response.json()['token'])
-        logger.info(f"Got new token, login/email: {args.login}")
-        print("Got new token\n")
     else:
         message = response.headers['message'] if 'message' in response.headers else ''
-        logger.info(f"Error due getting token, login/email: {args.login}, code: {response.status_code}")
-        print(f"Error due getting token: {response.status_code} {message}\n")
+        raise ServerError(f"{response.status_code} {message}")
 
 
-def show_all_pc(args: Namespace) -> None:
+def get_token_ui(args: Namespace) -> None:
+    try:
+        get_token(args.login, args.password)
+        print("Got new token")
+    except ServerError as e:
+        _on_server_error(e)
+
+
+@dataclass
+class PCEntity:
+    id: int
+    name: str
+
+
+def show_all_pc() -> Tuple[PCEntity]:
     token = store_keeper.get_token()
     if token is None:
-        print("Token is required\n")
-        return
+        raise TokenRequired()
     json = {"token": token}
     try:
         response = requests.get(f'http://{PATH}{SHOW_ALL_PC_PATH}', json=json)
     except Exception as e:
-        _on_server_error(e)
+        raise ServerError(e)
     json = response.json()
     if response.status_code == 200 and 'devices' in json:
-        logger.debug(f"Got new list of pc")
-        print("Your PCs:\n")
-        for device in json['devices']:
-            print(f"{device['id']}\t{device['name']}\n")
+        return tuple(PCEntity(device['id'], device['name']) for device in json['devices'])
     else:
         message = response.headers['message'] if 'message' in response.headers else ''
-        logger.info(f"Error due showing devices, code: {response.status_code}")
-        print(f"Error due showing devices: {response.status_code} {message}\n")
+        raise ServerError(f"{response.status_code} {message}")
+
+
+def show_all_pc_ui(args: Namespace | None = None) -> None:
+    try:
+        pc_entities = show_all_pc()
+        logger.debug(f"Got new list of pc")
+        print("Your PCs:")
+        for device in pc_entities:
+            print(f"{device.id}\t{device.name}")
+    except (ServerError, TokenRequired) as e:
+        _on_server_error(e)
 
 
 def run(args: Namespace) -> None:
-    token = '' if args.token is None else args.token
     if args.manage is None:
         from .managed_device_client import ManagedClient
-        client = ManagedClient(store_keeper, require_token=token)
+        client = ManagedClient(store_keeper, require_token=args.token)
     else:
         from .managing_device_client import ManagingClient
-        client = ManagingClient(store_keeper, str(args.manage), device_secure_token=token)
-    client.run()
+        client = ManagingClient(store_keeper, str(args.manage), device_secure_token=args.token)
+    try:
+        client.run()
+    except TokenRequired as e:
+        print(e)
 
 
 if __name__ == "__main__":
@@ -102,12 +137,12 @@ if __name__ == "__main__":
         sign_up_parser.add_argument('-login', type=str, help='Your unique name', required=True)
         sign_up_parser.add_argument('-email', type=str, help='Your email', required=True)
         sign_up_parser.add_argument('-password', type=str, help='Your password', required=True)
-        sign_up_parser.set_defaults(func=sign_up)
+        sign_up_parser.set_defaults(func=sign_up_ui)
 
         sign_in_parser = subparsers.add_parser('sign_in', help='Sign in')
         sign_in_parser.add_argument('-login', type=str, help='Your login or email', required=True)
         sign_in_parser.add_argument('-password', type=str, help='Your password', required=True)
-        sign_in_parser.set_defaults(func=sign_in)
+        sign_in_parser.set_defaults(func=sign_in_ui)
     else:
         run_parser = subparsers.add_parser('run', help="Run filesocket client")
         run_parser.add_argument('-manage', type=int, help='Id of managing device')
@@ -115,10 +150,10 @@ if __name__ == "__main__":
         run_parser.set_defaults(func=run)
 
         show_all_pc_parser = subparsers.add_parser('show_pc', help="Show your PCs (For managing device)")
-        show_all_pc_parser.set_defaults(func=show_all_pc)
+        show_all_pc_parser.set_defaults(func=show_all_pc_ui)
 
-    args = arg_parser.parse_args()
+    arguments = arg_parser.parse_args()
     try:
-        args.func(args)
+        arguments.func(arguments)
     except AttributeError:
         print("Use filesocket -h\n")

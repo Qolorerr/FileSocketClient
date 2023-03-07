@@ -8,7 +8,7 @@ import requests
 
 from .config import PATH, GET_NGROK_IP, NGROK_CHECK_ONLINE, NGROK_CMD_COMMAND, NGROK_UPLOAD_FILE, NGROK_DOWNLOAD_FILE, \
     NGROK_LIST_FILES
-from .exceptions import ServerError, PathNotFoundError
+from .exceptions import ServerError, PathNotFoundError, TokenRequired
 from .storekeeper import Storekeeper
 
 
@@ -16,10 +16,10 @@ DOWNLOADS_PATH = Path.home() / "Downloads"
 
 
 class ManagingClient:
-    def __init__(self, store_keeper: Storekeeper, device_id: str, device_secure_token: str = ''):
+    def __init__(self, store_keeper: Storekeeper, device_id: str, device_secure_token: str | None = None):
         self.store_keeper = store_keeper
         self.device_id = device_id
-        self.default_header = {'token': device_secure_token}
+        self.default_header = {'token': device_secure_token} if device_secure_token is not None else dict()
         self.device_ngrok_ip = None
         self.logger = logging.getLogger("managing")
 
@@ -168,6 +168,8 @@ class ManagingClient:
 
     def _get_ngrok_ip(self) -> None:
         token = self.store_keeper.get_token()
+        if token is None:
+            raise TokenRequired()
         json = {"device_id": self.device_id, "token": token}
         try:
             response = requests.get(f'http://{PATH}{GET_NGROK_IP}', json=json)
