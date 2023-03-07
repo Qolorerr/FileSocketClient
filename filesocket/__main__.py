@@ -121,6 +121,10 @@ def run(args: Namespace) -> None:
         print(e)
 
 
+def set_ngrok_token(token: str) -> None:
+    store_keeper.add_value("ngrok_token", token)
+
+
 if __name__ == "__main__":
     arg_parser = ArgumentParser()
     subparsers = arg_parser.add_subparsers(help='Methods')

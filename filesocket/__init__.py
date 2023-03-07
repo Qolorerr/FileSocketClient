@@ -23,6 +23,7 @@ from .__main__ import sign_up
 from .__main__ import sign_in
 from .__main__ import get_token
 from .__main__ import show_all_pc
+from .__main__ import set_ngrok_token
 from .__main__ import PCEntity
 
 __all__ = [
@@ -49,6 +50,7 @@ __all__ = [
     "sign_in",
     "get_token",
     "show_all_pc",
+    "set_ngrok_token",
     "PCEntity",
 ]
 
