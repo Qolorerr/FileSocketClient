@@ -1,8 +1,9 @@
 import logging
 import shutil
 import zipfile
+from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 from os import walk
 import requests
 
@@ -108,6 +109,19 @@ class ManagingClient:
             raise ServerError(f"{response.status_code} {message}")
         return response.json()
 
+    @staticmethod
+    def _bytes_to_readable_view(size: int) -> Tuple[int, str]:
+        if size // (2 ** 40) != 0:
+            return size // (2 ** 40), "TB"
+        elif size // (2 ** 30) != 0:
+            return size // (2 ** 30), "GB"
+        elif size // (2 ** 20) != 0:
+            return size // (2 ** 20), "MB"
+        elif size // (2 ** 10) != 0:
+            return size // (2 ** 10), "KB"
+        else:
+            return size, "B"
+
     def _user_interface(self):
         while True:
             try:
@@ -147,8 +161,15 @@ class ManagingClient:
                     list_files_response = self.list_files(path)
                     self.logger.debug(f"Got list files response, data: {list_files_response}")
                     if list_files_response is not None:
-                        print(*sorted(list_files_response['dirs']), sep='\n')
-                        print(*sorted(list_files_response['files']), sep='\n')
+                        for directory in sorted(list_files_response['dirs'], key=lambda entity: entity['name']):
+                            size, size_type = self._bytes_to_readable_view(directory['size'])
+                            print(f"{directory['name']}\t{size}{size_type}\t"
+                                  f"{datetime.fromtimestamp(directory['modification_time'])}")
+
+                        for file in sorted(list_files_response['files'], key=lambda entity: entity['name']):
+                            size, size_type = self._bytes_to_readable_view(file['size'])
+                            print(f"{file['name']}\t{size}{size_type}\t"
+                                  f"{datetime.fromtimestamp(file['modification_time'])}")
                 elif ans == '0':
                     print("Bye")
                     break

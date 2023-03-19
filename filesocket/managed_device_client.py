@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import zipfile
 from functools import wraps
-from os import listdir, walk
+from os import scandir, walk
 from pathlib import Path
 from typing import Optional, Callable, Any
 import requests
@@ -44,9 +44,15 @@ def list_files(path: Path, token: Optional[str] = Header(default='')):
     if not path.exists() or not path.is_dir():
         raise HTTPException(status_code=404, detail="Path not found")
     logger.info(f"Sent list of files in {path}")
-    files_and_dirs = {file for file in listdir(str(path))}
-    dirs = set(filter(lambda file: (path / file).is_dir(), files_and_dirs))
-    return {"dirs": list(dirs), "files": list(files_and_dirs - dirs)}
+    files = []
+    dirs = []
+    for entity in scandir(str(path)):
+        entity_dict = {"name": entity.name, "size": entity.stat().st_size, "modification_time": entity.stat().st_mtime}
+        if (path / entity.name).is_dir():
+            dirs.append(entity_dict)
+        else:
+            files.append(entity_dict)
+    return {"dirs": dirs, "files": files}
 
 
 @app.get('/file/download')
