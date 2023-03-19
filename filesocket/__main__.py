@@ -3,7 +3,7 @@ import socket
 import sys
 from argparse import ArgumentParser, Namespace
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Optional
 import requests
 
 from .config import PATH, SIGN_UP_PATH, GET_TOKEN_PATH, SHOW_ALL_PC_PATH, DEVICE_TYPE, store_keeper
@@ -97,7 +97,7 @@ def show_all_pc() -> Tuple[PCEntity]:
         raise ServerError(f"{response.status_code} {message}")
 
 
-def show_all_pc_ui(args: Namespace | None = None) -> None:
+def show_all_pc_ui(args: Optional[Namespace] = None) -> None:
     try:
         pc_entities = show_all_pc()
         logger.debug(f"Got new list of pc")

@@ -3,7 +3,7 @@ import shutil
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 from os import walk
 import requests
 
@@ -16,7 +16,7 @@ DOWNLOADS_PATH = Path.home() / "Downloads"
 
 
 class ManagingClient:
-    def __init__(self, device_id: str | int, device_secure_token: str | None = None):
+    def __init__(self, device_id: Union[str, int], device_secure_token: Optional[str] = None):
         self.device_id = device_id
         self.default_header = {'token': device_secure_token} if device_secure_token is not None else dict()
         self.device_ngrok_ip = None

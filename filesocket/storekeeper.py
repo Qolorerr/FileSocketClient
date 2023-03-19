@@ -1,6 +1,7 @@
 import json
 import os
 from logging.config import dictConfig
+from typing import Optional
 
 
 class Storekeeper:
@@ -39,6 +40,6 @@ class Storekeeper:
     def add_token(self, token: str) -> None:
         self.add_value("token", token)
 
-    def get_token(self) -> str | None:
+    def get_token(self) -> Optional[str]:
         data = self._get_json()
         return data["token"] if "token" in data else None

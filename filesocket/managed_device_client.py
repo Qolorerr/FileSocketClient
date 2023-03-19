@@ -110,7 +110,7 @@ def execute_cmd(command: str, token: Optional[str] = Header(default='')):
 
 
 class ManagedClient:
-    def __init__(self, port: int = 8000, require_token: str | None = None) -> None:
+    def __init__(self, port: int = 8000, require_token: Optional[str] = None) -> None:
         require_token = '' if require_token is None else require_token
         global secure_token
         self.port = port
