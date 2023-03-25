@@ -29,6 +29,10 @@ LOGGER_CONFIG = {
             "format": "%(asctime)s:%(name)s:%(process)d:%(lineno)d %(levelname)s %(module)s.%(funcName)s: %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
+        "command": {
+            "format": "%(asctime)s %(levelname)s %(funcName)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
         "simple": {
             "format": "[%(levelname)s] in %(module)s.%(funcName)s: %(message)s",
         },
@@ -42,7 +46,7 @@ LOGGER_CONFIG = {
             "backupCount": 2,
         },
         "command_logfile": {
-            "formatter": "default",
+            "formatter": "command",
             "level": "WARNING",
             "class": "logging.handlers.RotatingFileHandler",
             "filename": RECEIVED_COMMANDS_LOG,
