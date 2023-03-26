@@ -3,6 +3,7 @@ import shutil
 import zipfile
 from datetime import datetime
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Optional, Tuple, Union
 from os import walk
 import requests
@@ -48,10 +49,11 @@ class ManagingClient:
         if str(destination) == '.':
             destination = None
 
+        temp_dir = TemporaryDirectory()
         if path.is_file():
             files = {'file': open(path, 'rb')}
         else:
-            zip_file_path = DOWNLOADS_PATH / (path.name + '.zip')
+            zip_file_path = Path(temp_dir.name) / (path.name + '.zip')
             with zipfile.ZipFile(zip_file_path, "w") as zip_file:
                 for root, dirs, files in walk(path):
                     for file in files:
@@ -63,7 +65,9 @@ class ManagingClient:
         try:
             response = requests.post(f"{self.device_ngrok_ip}{NGROK_UPLOAD_FILE}",
                                      files=files, headers=self.default_header, data=destination_data)
+            temp_dir.cleanup()
         except Exception as e:
+            temp_dir.cleanup()
             raise ServerError(e)
         if response.status_code != 200:
             response_json = response.json()
