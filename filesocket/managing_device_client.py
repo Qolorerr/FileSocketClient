@@ -43,7 +43,9 @@ class ManagingClient:
         return response.json()
 
     # Send any file or folder to another PC
-    def send_file(self, path: Path, destination: Path = Path('')) -> None:
+    def send_file(self, path: Union[Path, str], destination: Union[Path, str] = Path('')) -> None:
+        path = Path(path)
+        destination = Path(destination)
         if not path.exists():
             raise PathNotFoundError
         if str(destination) == '.':
@@ -76,7 +78,9 @@ class ManagingClient:
             raise ServerError(f"{response.status_code} {message}")
 
     # Get file or folder from another PC
-    def get_file(self, path: Path, destination: Optional[Path] = Path('')) -> None:
+    def get_file(self, path: Union[Path, str], destination: Union[Path, str] = Path('')) -> None:
+        path = Path(path)
+        destination = Path(destination)
         if str(destination) != '.' and not destination.exists():
             raise PathNotFoundError
         if str(destination) == '.':
@@ -102,7 +106,8 @@ class ManagingClient:
         except Exception as e:
             raise IOError(e)
 
-    def list_files(self, path: Path) -> Optional[dict]:
+    def list_files(self, path: Union[Path, str]) -> Optional[dict]:
+        path = Path(path)
         try:
             response = requests.get(f'{self.device_ngrok_ip}{NGROK_LIST_FILES}?path={path}',
                                     headers=self.default_header)

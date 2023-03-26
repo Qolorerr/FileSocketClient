@@ -29,5 +29,5 @@ client.run(text_ui=False)
 client.cmd_command('ipconfig')
 
 # Send file
-client.send_file(Path("path/to/file/to/send"), Path("path/where/to/put"))
+client.send_file(Path("local/path/to/file/to/send"), Path("path/where/to/put"))
 ```
