@@ -68,8 +68,9 @@ def download_file(path: Path, token: Optional[str] = Header(default='')):
     zip_file_path = DOWNLOADS_PATH / (path.name + '.zip')
     with zipfile.ZipFile(zip_file_path, "w") as zip_file:
         for root, dirs, files in walk(path):
+            archive_path = Path(root).relative_to(path)
             for file in files:
-                zip_file.write(Path(root) / file)
+                zip_file.write(Path(root) / file, archive_path / file)
     logger.warning(f"Sent {path}")
     return FileResponse(path=str(zip_file_path), filename=zip_file_path.name, media_type='multipart/form-data')
 

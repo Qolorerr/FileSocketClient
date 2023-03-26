@@ -56,8 +56,9 @@ class ManagingClient:
             zip_file_path = Path(temp_dir.name) / (path.name + '.zip')
             with zipfile.ZipFile(zip_file_path, "w") as zip_file:
                 for root, dirs, files in walk(path):
+                    archive_path = Path(root).relative_to(path)
                     for file in files:
-                        zip_file.write(Path(root) / file)
+                        zip_file.write(Path(root) / file, archive_path / file)
             files = {'file': open(zip_file_path, 'rb')}
         destination_data = dict()
         if destination is not None:
